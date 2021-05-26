@@ -1,0 +1,37 @@
+Instruccions per el treball de final de curs de Daniel Garcia Cos
+
+Directoris:
+Tots els fitxers estan dins de /etc/ansible
+	Hosts: /etc/ansible/hosts
+	playbooks:
+		/etc/ansible/playbooks (playbooks per a les maquines linux)
+		/etc/ansible/windows_playbooks (playbooks per a les maquines Windows)
+
+He treballat amb maquines Linux Ubuntu i Debian, però hauria de funcionar
+amb cualsevol altra distribució.
+La maquina Windows és una Windows Server 2016
+ 
+Totes les maquines tenen IP fixes i un nom assignat dins l'arxiu hosts
+Es cas d'utilitzar maquines diferents es pot:
+	Canviar les IP de les maquines perque coincideixin
+	Canviar les IP del arxiu Hosts d'Ansible
+
+Per tenir accés a internet i entre elles, totes les maquines tenen 2 adaptadors:
+	Adaptador 1: NAT
+	Adaptador 2: Solo Anfitrion #2 en mode dhcp
+		Utilitza la següent config:
+			Direccion servidor: 192.168.1.3
+			Mascara: 24
+			Limit inferior: 192.168.1.4
+			Limit superior: 192.168.1.254
+			
+Preparació maquines linux:
+	/etc/ssh/sshd_config:
+		PermitRootLogin yes
+
+Preparació maquines Windows (https://docs.ansible.com/ansible/latest/user_guide/windows_setup.html#winrm-setup):
+	Executar script ConfigureRemotingForAnsible.ps1 situat a la mateixa carpeta que aquest fitxer
+	Executar comanda: winrm quickconfig
+				yes a tot
+			
+		
