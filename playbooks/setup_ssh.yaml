@@ -1,0 +1,22 @@
+---
+- name: Preparant SSH
+  hosts: Grup_Linux
+  become: yes
+
+  tasks:
+    - name: Creant la carpeta si no existeix
+      file:
+        path: /root/.ssh
+        state: directory
+        mode: "0700"
+
+    - name: Copiant clau
+      copy: 
+        src: "/root/.ssh/id_rsa.pub"
+        dest: "/root/.ssh/authorized_keys"
+        mode: "0644"
+
+    - name: Reiniciant SSHD
+      service:
+        name: sshd
+        state: restarted

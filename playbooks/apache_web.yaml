@@ -1,0 +1,74 @@
+---
+- name: Setup apache
+  hosts: Grup_Linux
+  vars:
+    http_host: "pagina_ansible"
+    http_conf: "pagina_ansible.conf"
+    http_port: 80
+
+  tasks:
+    - name: Instalan apache2
+      apt: 
+        name=apache2
+
+    - name: Creant la ruta on guardar les configuracions
+      file:
+        path: "/var/www/{{ inventory_hostname }}"
+        state: directory
+        owner: dagaco
+        mode: '0775'
+
+    - name: Copiant i modificant l'index
+      template:
+        src: "/templates/apache/index.html.j2"
+        dest: "/var/www/{{ inventory_hostname }}/index.html"
+
+    - name: Copiant i modificant l'arixu de configuració a cada maquina
+      template:
+        src: "/templates/apache/apache.conf.j2"
+        dest: "/etc/apache2/sites-available/{{ http_conf }}"
+      notify: Reiniciant apache
+
+    - name: Activant la pagina
+      shell: a2ensite {{ http_conf }}
+      notify: Recarregant Apache
+
+    - name: Esborrant la pagina predeterminada
+      file:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        state: absent
+
+    - name: Afegint IP al arxiu hosts
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          {% for host in groups['Grup_Linux'] %}
+          {{ hostvars[host]['ansible_facts']['enp0s8']['ipv4']['address'] }} {{host}}
+          {% endfor %}
+
+    - name: "Creant una execpió al port {{ http_port }} al firewall de la maquina ubuntu"
+      ufw:
+        rule: allow
+        port: "{{ http_port }}"
+        proto: tcp
+      ignore_errors: yes
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Reiniciant UFW
+      service:
+        name: apache2
+        state: restarted
+      ignore_errors: yes
+      when: ansible_facts['os_family'] == "Debian"
+
+  handlers:
+    - name: Recarregant Apache
+      service:
+        name: apache2
+        state: reloaded
+  
+    - name: Reiniciant apache
+      service:
+        name: apache2
+        state: restarted
+

@@ -1,0 +1,44 @@
+---
+  - name: Probant Windows
+    hosts: Windows
+
+    tasks:
+      - name: Creant un grup pels usuaris d'Ansible
+        win_group:
+          name: ansible_users
+          description: Grup pels usuaris comuns creats desde Ansible
+          state: present
+      
+      - name: Creem L'usuari dagaco
+        win_user:
+          name: dagaco
+          password: Clotfje21
+          state: present
+          groups:
+            - ansible_users
+
+      - name: Creant l'usuari ansible
+        win_user:
+          name: ansible
+          password: Fjeclot21
+          groups:
+            - ansible_users
+            - administradores
+          state: present
+
+      - name: Creant perfil per l'usuari dagaco
+        community.windows.win_user_profile:
+          username: dagaco
+          name: dagaco
+          state: present
+
+      - name: Creant perfil per l'usuari ansible
+        community.windows.win_user_profile:
+          username: ansible
+          name: ansible
+          state: present
+
+      - name: Creant carpeta a l'escriptori de l'usuari ansible
+        win_file:
+          path: C:\Users\ansible\Desktop\Fitxers_remots
+          state: directory

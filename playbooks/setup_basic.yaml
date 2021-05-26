@@ -1,0 +1,55 @@
+---
+- name: Setup basic
+  hosts: Grup_Linux
+  vars:
+    password: clotfje
+
+  tasks:
+      - name: Neteja sources
+        lineinfile:
+            path: /etc/apt/sources.list
+            regexp: "(.*)cdrom(.*)" 
+            state: absent
+            backup: yes
+
+      - name: apt-get update
+        apt: 
+          update_cache: yes
+          cache_valid_time: 86400
+
+      - name: Instala aptitude
+        apt:
+          name: aptitude
+        
+      - name: Instala sudo
+        apt:
+          name: sudo
+
+      - name: apt-get upgrade
+        apt:
+          upgrade: yes
+
+      - name: Creem el grup ansible_users
+        group:
+          name: ansible_users
+          state: present
+          gid: 2324
+        
+      - name: Creem el grup dagaco
+        group:
+          name: ansible_users
+          state: present
+          gid: 2323
+
+      - name: Creem o actualitzem l'usuari dagaco
+        user:
+          name: dagaco
+          uid: 1323
+          shell: /bin/bash
+          state: present
+          group: dagaco
+          groups: sudo,ansible_users
+          password: "{{password | password_hash('sha512')}}"
+          generate_ssh_key: yes
+          ssh_key_file: .ssh/id_rsa
+

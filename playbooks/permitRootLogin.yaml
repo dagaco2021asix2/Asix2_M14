@@ -1,0 +1,12 @@
+---
+- name: Preparant SSH
+  hosts: Grup_Linux
+  become: yes
+
+    - name: Editant arxiu
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "(.*)#PermitRootLogin(.*)"
+        insertafter: "^PermitRootLogin(.*)"
+        line: "PermitRootLogin yes"
+        backup: yes

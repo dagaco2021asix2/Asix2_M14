@@ -1,0 +1,42 @@
+---
+- name: Setup IIS
+  hosts: Windows
+  vars:
+    ruta_web: "c:\\inetpub\\wwwroot\\ansible_test"
+    port_web: 8080
+
+  tasks:
+    - name: Instalant la caracteristica IIS
+      win_feature:
+        name: "Web-Server"
+        state: present
+        restart: no
+        include_sub_features: yes
+        include_management_tools: no
+
+    - name: Creant el directori de la pagina
+      win_file: 
+        path: "{{ ruta_web }}"
+        state: directory
+
+    - name: Pujant l'arxiu d'index
+      win_template:
+        src: /templates/iis/index.html.j2
+        dest: "c:\\inetpub\\wwwroot\\index.html"
+
+    - name: Creant la pagina web
+      win_iis_website:
+        name: "Pagina_Ansible"
+        state: started
+        port: "{{ port_web }}"
+        physical_path: "{{ ruta_web }}"
+
+    - name: Afegint regla al firewall
+      win_firewall_rule:
+        name: Pagina_Ansible
+        enable: yes
+        state: present
+        localport: "{{ port_web }}"
+        action: Allow
+        direction: In
+        protocol: Tcp
